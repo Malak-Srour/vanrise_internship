@@ -1,0 +1,107 @@
+﻿@{
+    ViewBag.Title = "Phone Number";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phone Numbers</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+<body>
+
+    <div ng-app="phoneApp" ng-controller="PhoneNumberController">
+        <div class="container">
+            <h2>Phone Numbers</h2>
+            <input type="text" ng-model="searchText" placeholder="Search by Number..." class="form-control" />
+            <device-selector ng-model="selectedDeviceId"></device-selector>
+            <button class="btn btn-primary" ng-click="search()">Search</button>
+            <button class="btn btn-success" ng-click="openAddModal()">Add</button>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Number</th>
+                        <th>Device</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="phoneNumber in filteredPhoneNumbers">
+                        <td>{{ phoneNumber.ID }}</td>
+                        <td>{{ phoneNumber.Number }}</td>
+                        <td>{{ phoneNumber.DeviceName }}</td>
+                        <td>
+                            <button class="btn btn-warning" ng-click="openEditModal(phoneNumber)">Edit</button>
+                            <button class="btn btn-danger" ng-click="deletePhoneNumber(phoneNumber.ID)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap-tpls.min.js"></script>
+    <script src="~/Scripts/phoneNumber.js"></script>
+
+    <!-- Modal Templates will be added here -->
+    <script type="text/ng-template" id="addPhoneNumberModal.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Add New Phone Number</h3>
+        </div>
+        <div class="modal-body">
+            <form name="addPhoneForm">
+                <div class="form-group">
+                    <label for="phoneNumber">Phone Number:</label>
+                    <input type="text" id="phoneNumber" ng-model="newPhoneNumber.Number" class="form-control"
+                           placeholder="Enter 8-digit phone number" maxlength="8" pattern="\d{8}" required />
+                    <span class="text-danger" ng-show="addPhoneForm.phoneNumber.$error.required && addPhoneForm.phoneNumber.$touched">Phone number is required.</span>
+                    <span class="text-danger" ng-show="numberExists">This phone number already exists. Please enter a different number.</span>
+                </div>
+                <div class="form-group">
+                    <label for="device">Device:</label>
+                    <!-- Fixed the ng-model here to bind with newPhoneNumber.DeviceID -->
+                    <device-selector ng-model="newPhoneNumber.DeviceID"></device-selector>
+                    <span class="text-danger" ng-show="!newPhoneNumber.DeviceID">Please select a device.</span>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <!-- Disabled condition checks if the form is invalid or the device isn't selected -->
+            <button class="btn btn-primary" ng-click="saveNewPhoneNumber()" ng-disabled="addPhoneForm.$invalid || !newPhoneNumber.DeviceID || numberExists">Save</button>
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="editPhoneNumberModal.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Phone Number</h3>
+        </div>
+        <div class="modal-body">
+            <form name="editPhoneForm">
+                <div class="form-group">
+                    <label for="phoneNumber">Phone Number:</label>
+                    <input type="text" class="form-control" id="phoneNumber" ng-model="selectedPhoneNumber.Number"
+                           placeholder="Enter 8-digit phone number" maxlength="8" pattern="\d{8}" required />
+                    <span class="text-danger" ng-show="editPhoneForm.phoneNumber.$error.required && editPhoneForm.phoneNumber.$touched">Phone number is required.</span>
+                    <span class="text-danger" ng-show="numberExists">This phone number already exists. Please enter a different number.</span>
+                </div>
+                <div class="form-group">
+                    <label for="device">Device:</label>
+                    <device-selector ng-model="selectedPhoneNumber.DeviceID"></device-selector>
+                    <span class="text-danger" ng-show="!selectedPhoneNumber.DeviceID">Please select a device.</span>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" ng-click="saveEditedPhoneNumber()" ng-disabled="editPhoneForm.$invalid || !selectedPhoneNumber.DeviceID || numberExists">Save</button>
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+        </div>
+    </script>
+
+
+</body>
+</html>
+

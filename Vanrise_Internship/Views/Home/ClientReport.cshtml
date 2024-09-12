@@ -1,0 +1,35 @@
+﻿@{
+    ViewBag.Title = "Client Report";
+}
+<!DOCTYPE html>
+<html lang="en" ng-app="clientReportApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Client Report</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+<body>
+    <div ng-controller="ReportController" class="container">
+        <h2>Client Report</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Number of Clients</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="report in clientReports">
+                    <td>{{ report.Type == 1 ? 'Individual' : 'Organization' }}</td>
+                    <td>{{ report.NoOfClients }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="~/Scripts/clientsReport.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+﻿@{
+    ViewBag.Title = "Phone Number Reservation Management";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Phone Number Reservations</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div ng-app="reservationApp" ng-controller="ReservationController" class="container">
+        <h2>Phone Number Reservations</h2>
+
+        <!-- Phone Number Selector -->
+        <div class="form-group">
+            <label for="phoneNumberFilter">Filter by Phone Number:</label>
+            <phone-number-selector selected="selectedPhoneNumber"></phone-number-selector>
+        </div>
+        <button class="btn btn-primary" ng-click="filterByPhoneNumber()">Filter by Phone Number</button>
+
+        <!-- Client Name Selector -->
+        <div class="form-group">
+            <label for="clientNameFilter">Filter by Client Name:</label>
+            <client-name-selector selected="selectedClientID"></client-name-selector>
+        </div>
+        <button class="btn btn-primary" ng-click="filterByClientName()">Filter by Client Name</button>
+
+        <!-- Reservations Table -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Client Name</th>
+                    <th>Phone Number</th>
+                    <th>Begin Effective Date (BED)</th>
+                    <th>End Effective Date (EED)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="reservation in filteredReservations">
+                    <td>{{ reservation.ID }}</td>
+                    <td>{{ reservation.ClientName }}</td>  <!-- Client name -->
+                    <td>{{ reservation.PhoneNumber }}</td>  <!-- Phone number -->
+                    <td>{{ reservation.BED | date: 'yyyy-MM-dd' }}</td>
+                    <td>{{ reservation.EED ? (reservation.EED | date: 'yyyy-MM-dd') : 'Active' }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- AngularJS and UI Bootstrap scripts -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap-tpls.min.js"></script>
+    <script src="~/Scripts/client.js"></script>
+    <script src="~/Scripts/phoneReservation.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Clients</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/Content/clients.css">
+</head>
+
+<body>
+    <div ng-app="clientApp" ng-controller="ClientController" class="container">
+        <h2>Clients</h2>
+
+        <!-- Search by Name -->
+        <input type="text" ng-model="searchText" placeholder="Search by name..." class="form-control">
+        <button class="btn btn-primary" ng-click="search()">Search</button>
+
+        <!-- Filter by Client Type -->
+        <div class="form-group">
+            <label for="clientTypeFilter">Filter by Client Type:</label>
+            <select class="form-control" ng-model="clientTypeFilter">
+                <option value="">Select Client Type</option>
+                <option value="1">Individual</option>
+                <option value="2">Organization</option>
+            </select>
+        </div>
+
+        <!-- Buttons -->
+        <button class="btn btn-primary" ng-click="searchByType()">Search by Type</button>
+        <button class="btn btn-success" ng-click="openAddModal()">Add Client</button>
+
+        <!-- Client Table -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Birth Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="client in filteredClients">
+                    <td>{{ client.ID }}</td>
+                    <td>{{ client.Name }}</td>
+                    <td>{{ client.Type == 1 ? 'Individual' : 'Organization' }}</td>
+                    <td>{{ client.BirthDate | date:'yyyy-MM-dd' }}</td>
+                    <td>
+                        <button class="btn btn-warning" ng-click="openEditModal(client)">Edit</button>
+                        <button class="btn btn-danger" ng-click="deleteClient(client.ID)">Delete</button>
+
+                    </td>
+                    <!-- Reserve Button -->
+                    <td>
+                        <button class="btn btn-primary" ng-click="openReserveModal(client)">
+                            Reserve Phone Number
+                        </button>
+                    </td>
+                    <!-- Unreserve Button (Disabled if no active reservation) -->
+                    <td>
+                        <button class="btn btn-secondary" ng-click="openUnreserveModal(client)"
+                                ng-disabled="!client.hasActiveReservation">
+                            Unreserve Phone Number
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Client Modal (Shared for Add and Edit) -->
+        <script type="text/ng-template" id="clientModal.html">
+            <div class="modal-header">
+                <h3 class="modal-title">{{ isEdit ? 'Edit Client' : 'Add New Client' }}</h3>
+            </div>
+            <div class="modal-body">
+                <form name="clientForm">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" class="form-control" id="name" ng-model="selectedClient.Name" placeholder="Enter client name" required>
+                        <span class="text-danger" ng-show="clientForm.name.$touched && clientForm.name.$error.required">Name is required.</span>
+                        <span class="text-danger" ng-show="nameExists">This name already exists. Please choose a different one.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="type">Type</label>
+                        <select class="form-control" id="type" ng-model="selectedClient.Type" ng-disabled="isEdit" ng-change="toggleBirthDate()" required>
+                            <option value="1">Individual</option>
+                            <option value="2">Organization</option>
+                        </select>
+                        <span class="text-danger" ng-show="clientForm.type.$touched && clientForm.type.$error.required">Client type is required.</span>
+                    </div>
+
+                    <div class="form-group" ng-if="showBirthDate">
+                        <label for="birthdate">Birth Date</label>
+                        <input type="date" class="form-control" id="birthdate" ng-model="selectedClient.BirthDate" ng-change="validateAge()" required>
+                        <span class="text-danger" ng-show="clientForm.birthdate.$touched && clientForm.birthdate.$error.required">Birth Date is required.</span>
+                        <span class="text-danger" ng-show="ageInvalid">Client must be at least 18 years old.</span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" ng-click="saveClient()" ng-disabled="clientForm.$invalid || ageInvalid || nameExists">Save</button>
+                <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+            </div>
+        </script>
+
+
+        <!-- Reserve Phone Number Modal Template -->
+        <script type="text/ng-template" id="reservePhoneNumberModal.html">
+            <div class="modal-header">
+                <h3 class="modal-title">Reserve Phone Number for {{ client.Name }}</h3>
+            </div>
+            <div class="modal-body">
+                <form name="reserveForm">
+                    <div class="form-group">
+                        <label for="phoneNumberSelector">Select Phone Number</label>
+                        <phone-number-selector selected="selectedPhoneNumber"></phone-number-selector>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" ng-click="reservePhoneNumber()" >Save</button>
+                <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+            </div>
+        </script>
+
+
+
+        <!-- Unreserve Modal Template -->
+        <script type="text/ng-template" id="unreservePhoneNumberModal.html">
+            <div class="modal-header">
+                <h3 class="modal-title">Unreserve Phone Number for {{ client.Name }}</h3>
+            </div>
+            <div class="modal-body">
+                <form name="unreserveForm">
+                    <div class="form-group">
+                        <label for="phoneNumberSelector">Select Phone Number</label>
+                        <select class="form-control" ng-model="selectedPhoneNumber"
+                                ng-options="phone as phone.Number for phone in reservedPhoneNumbers track by phone.ID"
+                                ng-change="logSelectedPhoneNumber()">
+                            <!-- Trigger the log function on change -->
+                            <option value="">Select Phone Number</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" ng-click="unreservePhoneNumber()" ng-disabled="!selectedPhoneNumber">Yes</button>
+                <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+            </div>
+        </script>
+
+    </div>
+
+    <!-- AngularJS and UI Bootstrap scripts -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap-tpls.min.js"></script>
+    <script src="~/Scripts/client.js"></script>
+    
+</body>
+</html>
+

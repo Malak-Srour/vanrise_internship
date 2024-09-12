@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devices Report</title>
+    <link rel="stylesheet" href="~/Content/devicesReport.css">
+
+</head>
+<body>
+    <h1>Devices Reservation Report</h1>
+    <table id="deviceReportTable">
+        <thead>
+            <tr>
+                <th>Device Name</th>
+                <th>Reserved</th>
+                <th>Unreserved</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here via JavaScript -->
+        </tbody>
+    </table>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $.ajax({
+                url: '/devices/getDevices',
+                method: 'GET',
+                success: function (data) {
+                    let tableBody = $('#deviceReportTable tbody');
+                    tableBody.empty();
+
+                    data.forEach(function (item) {
+                        tableBody.append(`
+                                <tr>
+                                    <td>${item.DeviceName}</td>
+                                    <td>${item.Reserved}</td>
+                                    <td>${item.Unreserved}</td>
+                                </tr>
+                            `);
+                    });
+                },
+                error: function (error) {
+                    console.log("Error:", error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

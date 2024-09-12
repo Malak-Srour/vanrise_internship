@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Devices</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/Content/loader.css">
+</head>
+<body>
+    <div id="loader" ng-show="isLoading" class="loader-overlay">
+        <svg viewBox="25 25 50 50">
+            <circle r="20" cy="50" cx="50"></circle>
+        </svg>
+    </div>
+
+
+    <div ng-app="deviceApp" ng-controller="DeviceController">
+        <div class="container">
+            <h2>Devices</h2>
+            <input type="text" ng-model="searchText" placeholder="Search..." class="form-control" />
+            <button class="btn btn-primary" ng-click="search()">Search</button>
+            <button class="btn btn-success" ng-click="openAddModal()">Add</button>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="device in filteredDevices">
+                        <td>{{ device.ID }}</td>
+                        <td>{{ device.Name }}</td>
+                        <td>
+                            <button class="btn btn-primary" ng-click="openPhoneNumberDrilldown(device)">View Phone Numbers</button>
+
+                            <button class="btn btn-warning" ng-click="openEditModal(device)">Edit</button>
+                            <button class="btn btn-danger" ng-click="deleteDevice(device.ID)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Error message for device loading -->
+            <div class="alert alert-danger" ng-show="deviceLoadingError">
+                {{ deviceLoadingError }}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap-tpls.min.js"></script>
+    <script src="~/Scripts/devices.js"></script>
+
+    <!-- Add Device Modal -->
+    <script type="text/ng-template" id="addDeviceModal.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Add New Device</h3>
+        </div>
+        <div class="modal-body">
+            <form name="addDeviceForm" novalidate>
+                <div class="form-group" ng-class="{ 'has-error': addDeviceForm.deviceName.$invalid && addDeviceForm.deviceName.$touched }">
+                    <label for="deviceName">Device Name:</label>
+                    <input type="text" class="form-control" id="deviceName" ng-model="newDevice.name" name="deviceName" required>
+                    <div class="validation-error" ng-show="addDeviceForm.deviceName.$invalid && addDeviceForm.deviceName.$touched">
+                        Device name is required.
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" ng-click="saveNewDevice(addDeviceForm.$valid)" ng-disabled="addDeviceForm.$invalid">Save</button>
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+        </div>
+    </script>
+
+    <!-- Edit Device Modal -->
+    <script type="text/ng-template" id="editDeviceModal.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Device</h3>
+        </div>
+        <div class="modal-body">
+            <form name="editDeviceForm" novalidate>
+                <div class="form-group" ng-class="{ 'has-error': editDeviceForm.deviceName.$invalid && editDeviceForm.deviceName.$touched }">
+                    <label for="deviceName">Device Name:</label>
+                    <input type="text" class="form-control" id="deviceName" ng-model="selectedDevice.Name" name="deviceName" required>
+                    <div class="validation-error" ng-show="editDeviceForm.deviceName.$invalid && editDeviceForm.deviceName.$touched">
+                        Device name is required.
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" ng-click="saveEditedDevice(editDeviceForm.$valid)" ng-disabled="editDeviceForm.$invalid">Save</button>
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="phoneNumberDrilldown.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Phone Numbers for Device: {{ device.Name }}</h3>
+        </div>
+        <div class="modal-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Phone Number</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="phoneNumber in phoneNumbers">
+                        <td>{{ phoneNumber.ID }}</td>
+                        <td>{{ phoneNumber.Number }}</td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" ng-click="close()">Close</button>
+        </div>
+    </script>
+
+</body>
+</html>
